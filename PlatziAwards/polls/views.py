@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+# to instantia our object for Class Based Views or CBV
+from django.views import generic
 
 from .models import Question, Choice
 
@@ -30,7 +32,30 @@ from .models import Question, Choice
 #         "question": question
 #     })
 
+## Class Based Views
+## To create CBV, is important to follow the name standard NameView() in Pascal case, 
+## for ex: IndexView() for index page
+class IndexView(generic.ListView): # inherite from generic.ListView
+    # our template name is defined as a attribute class, where it will be send our context
+    template_name = "polls/index.html"
+    # the same for our var, but now as a attribute that is returned by get_queryset
+    context_object_name = "latest_question_list"
 
+    # method to return context
+    def get_queryset(self):
+        """Return the last five published questions"""
+        # this returned value will be stored in our context_object
+        return Question.objects.order_by("-pub_date")[:5] # the - sign indicates order from recent to lasts
+    
+class DetailView(generic.DetailView):
+    # this automatically sends our Model to our template
+    model = Question
+    template_name = "polls/detail.html"
+
+class ResultView(generic.DetailView):
+    # this automatically sends our Model to our template
+    model = Question
+    template_name = "polls/result.html"
 
 # we get an request and question_id from our form on detail.html, that redirects to vote view
 def vote(request, question_id):
